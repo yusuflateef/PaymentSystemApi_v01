@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\PaymentSystemApi_v01.props" />
-</Project>
