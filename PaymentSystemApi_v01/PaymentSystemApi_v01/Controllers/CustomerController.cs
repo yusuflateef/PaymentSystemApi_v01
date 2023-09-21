@@ -16,19 +16,19 @@ namespace PaymentSystemApi_v01.Controllers
         }
 
         [HttpPost]
-        public ActionResult<IEnumerable<CustomerDto>> Customers(CustomerDto input)
+        public ActionResult<IEnumerable<CustomerDto>> Customers(CustomerRequest input)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var customers = _customerProvider.Customer(input);
+            var (success, fail) = _customerProvider.Customer(input).Result;
 
-            return Ok(customers);
+            return Ok(new {success, fail});
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CustomerDto>> Customers()
+        public async Task<ActionResult<IEnumerable<CustomerDto>>> Customers()
         {
             var customers = _customerProvider.Customers().Result.customers;
 
@@ -42,10 +42,18 @@ namespace PaymentSystemApi_v01.Controllers
             return Ok(customers.customer);
         }
 
-        [HttpGet("CustomerHistory/{nationalId}")]
+        [HttpGet("CustomerTransactions/{nationalId}")]
         public async Task<ActionResult<(bool success,IEnumerable<TransactionHistoryDto> transaction, bool fail)>> CustomerByNationalId(string nationalId)
         {
             var (successful, transaction, fail) = await _customerProvider.TransactionHistory(nationalId);
+
+            return Ok(new { successful, fail, transaction });
+        }
+
+        [HttpGet("/CustomerTransactions")]
+        public async Task<ActionResult<(bool success, IEnumerable<TransactionHistoryDto> transaction, bool fail)>> CustomerTransactions()
+        {
+            var (successful, transaction, fail) = await _customerProvider.TransactionHistory();
 
             return Ok(new { successful, fail, transaction });
         }

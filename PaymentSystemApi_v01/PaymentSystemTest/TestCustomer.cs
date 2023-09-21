@@ -16,28 +16,38 @@ namespace PaymentSystemTest
         {
            
             var nationalId = "1234567890"; // Replace with a valid nationalId
-            List<TransactionHistoryDto> transacton = new();
-            var expectedTransaction = new TransactionHistoryDto
+            List<CustomerDto> customer= new();
+            ////var expectedTransaction = new TransactionHistoryDto
+            ////{
+            ////    // Initialize with expected data for testing
+
+            ////    CustormId ="123",
+            ////    CreationDate = DateTime.Now,
+            ////    Customer = new Customer
+            ////    {
+            ////        Name = "testName",
+            ////        CustomerNumber = "08036266786",
+            ////        DateOfBirth = DateTime.Now,
+            ////        NationalId = nationalId,
+            ////        Id = "123",
+            ////        Surname = "testSurname",
+            ////        TransactionHistory = null,
+            ////    }
+            ////};
+            var custom = new CustomerDto
             {
-                // Initialize with expected data for testing
-              
-                CustormId ="123",
-                CreationDate = DateTime.Now,
-                Customer = new Customer {
-                    Name = "testName",
-                    CustomerNumber = "08036266786",
-                    DateOfBirth = DateTime.Now, 
-                    NationalId = nationalId,    
-                       Id = "123", 
-                       Surname = "testSurname",
-                    TransactionHistory=null ,  
-                }
+                Name = "testName",
+                CustomerNumber = "08036266786",
+                DateOfBirth = DateTime.Now,
+                NationalId = nationalId,
+                Surname = "testSurname",
+                TransactionHistory = null,
             };
-            transacton.Add(expectedTransaction);
+            customer.Add(custom);
 
             var mockCustomerProvider = new Mock<ICustomerService>();
-            mockCustomerProvider.Setup(provider =>  provider.TransactionHistory(nationalId).Result)
-                .Returns((true,transacton,false)); 
+            mockCustomerProvider.Setup(provider =>  provider.Customers().Result)
+                .Returns((true, customer, false)); 
 
 
             // Test Custom Controller
@@ -45,12 +55,12 @@ namespace PaymentSystemTest
             var controller = new CustomerController(mockCustomerProvider.Object);
 
             // Act
-            var result = await controller.CustomerByNationalId(nationalId);
+            var result =  controller.Customers().Result;
 
 
             // Assert
-          //  Assert.IsType<(bool,IEnumerable <TransactionHistoryDto>,bool)>(result);
-            Assert.NotEmpty(result.Value.transaction);
+           Assert.IsAssignableFrom<IEnumerable<CustomerDto>>(result);
+            Assert.NotNull(result);
            // var response = Assert.IsType<TransactionHistoryDto>(okResult);
 
             mockCustomerProvider.Verify(provider => provider.TransactionHistory(nationalId), Times.Once);

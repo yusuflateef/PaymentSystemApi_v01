@@ -9,6 +9,8 @@ namespace PaymentSystemApi_v01
     {
         public MappingProfile() {
             CreateMap<Customer, CustomerDto>().ReverseMap();
+            CreateMap<Customer, CustomerRequest>().ReverseMap();
+
             CreateMap<Marchant, MarchantDto>().ReverseMap();
             CreateMap<TransactionHistory, TransactionHistoryDto>().ReverseMap();
 

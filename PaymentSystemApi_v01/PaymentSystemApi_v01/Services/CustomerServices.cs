@@ -75,9 +75,15 @@ namespace PaymentSystemApi_v01.Services
             return await Task.FromResult((true, _mapper.Map<IEnumerable<CustomerDto>>(customers), false));
         }
 
-        public async Task<(bool successful, bool fail)> Customer(CustomerDto input)
+        public async Task<(bool successful, bool fail)> Customer(CustomerRequest input)
         {
-             await Context.AddAsync(input);
+            var newCustomer = _mapper.Map<Customer>(input);
+             await Context.AddAsync(newCustomer);
+            await Context.transactionHistories.AddAsync(new TransactionHistory {
+                CreationDate = DateTime.Now,
+                CustormId = newCustomer.Id,
+            });;
+
            var result= await Context.SaveChangesAsync();
             if (result > -1)
             { 
@@ -91,17 +97,20 @@ namespace PaymentSystemApi_v01.Services
 
         public async Task<(bool successful, IEnumerable<TransactionHistoryDto> transaction, bool fail)> TransactionHistory()
         {
-            //var customers = Context.transactionHistories.
-            //    Join(Context.Customers, trans => trans.CustormId, cus => cus.Id, (trans, cus) => new { transactionHistory = trans, customer = cus }).Select(data => new TransactionHistory
-            //    {
-            //        Id = data.transactionHistory.Id,
-            //        Customer = data.customer,
-            //        CreationDate = data.transactionHistory.CreationDate
+            var transaction = Context.transactionHistories.
+                Join(Context.Customers, trans => trans.CustormId, cus => cus.Id, (trans, cus) => new { transactionHistory = trans, customer = cus })
+                     
+                .Select(data => new TransactionHistory
+                {
+                    Id = data.transactionHistory.Id,
+                    Customer = data.customer,
+                    CreationDate = data.transactionHistory.CreationDate,
+                    CustormId = data.customer.Id,
 
-            //    });
+                });
 
 
-            var transaction = Context.transactionHistories.Include(x=>x.Customer).Select(data =>data);
+            
 
 
             return await Task.FromResult((true, _mapper.Map<IEnumerable<TransactionHistoryDto>>(transaction), false));
@@ -109,16 +118,7 @@ namespace PaymentSystemApi_v01.Services
 
         public async Task<(bool successful, IEnumerable<TransactionHistoryDto> transaction, bool fail)> TransactionHistory(string NationalId)
         {
-            //var customers = Context.Customers.
-            //    Join(Context.transactionHistories, cus => cus.Id, trans => trans.CustormId, (cus, trans) => new { customer = cus, transactionHistory = trans }).Select(data => new Customer
-            //    {
-            //        NationalId = data.customer.NationalId,
-            //        Name = data.customer.Name,
-            //        DateOfBirth = data.customer.DateOfBirth,
-            //        Surname = data.customer.Surname,
-            //        CustomerNumber = data.customer.CustomerNumber
-
-            //    });
+            
 
             var transaction = Context.transactionHistories.
                 Join(Context.Customers, trans => trans.CustormId, cus => cus.Id, (trans, cus) => new { transactionHistory = trans, customer = cus })
