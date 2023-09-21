@@ -3,6 +3,7 @@ using PaymentSystemApi_v01.DTO;
 using PaymentSystemApi_v01.Contracts;
 using PaymentSystemApi_v01.Controllers;
 using PaymentSystemApi_v01.Core;
+using System.Collections.Generic;
 
 namespace PaymentSystemTest
 {
@@ -19,8 +20,7 @@ namespace PaymentSystemTest
             var expectedTransaction = new TransactionHistoryDto
             {
                 // Initialize with expected data for testing
-                // Adjust the data to match your expectations
-                // ...
+              
                 CustormId ="123",
                 CreationDate = DateTime.Now,
                 Customer = new Customer {
@@ -36,18 +36,22 @@ namespace PaymentSystemTest
             transacton.Add(expectedTransaction);
 
             var mockCustomerProvider = new Mock<ICustomerService>();
-            mockCustomerProvider.Setup(provider =>  provider.TransactionHistory(nationalId).Result.transaction)
-                .Returns((transacton)); 
-            // Simulate a successful transaction history
+            mockCustomerProvider.Setup(provider =>  provider.TransactionHistory(nationalId).Result)
+                .Returns((true,transacton,false)); 
+
+
+            // Test Custom Controller
 
             var controller = new CustomerController(mockCustomerProvider.Object);
 
             // Act
             var result = await controller.CustomerByNationalId(nationalId);
 
+
             // Assert
-            var okResult = Assert.IsType<TransactionHistoryDto>(result);
-            var response = Assert.IsType<TransactionHistoryDto>(okResult);
+          //  Assert.IsType<(bool,IEnumerable <TransactionHistoryDto>,bool)>(result);
+            Assert.NotEmpty(result.Value.transaction);
+           // var response = Assert.IsType<TransactionHistoryDto>(okResult);
 
             mockCustomerProvider.Verify(provider => provider.TransactionHistory(nationalId), Times.Once);
         }

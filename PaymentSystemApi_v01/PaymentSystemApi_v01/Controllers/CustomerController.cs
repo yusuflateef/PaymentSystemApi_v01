@@ -43,7 +43,7 @@ namespace PaymentSystemApi_v01.Controllers
         }
 
         [HttpGet("CustomerHistory/{nationalId}")]
-        public async Task<ActionResult<TransactionHistoryDto>> CustomerByNationalId(string nationalId)
+        public async Task<ActionResult<(bool success,IEnumerable<TransactionHistoryDto> transaction, bool fail)>> CustomerByNationalId(string nationalId)
         {
             var (successful, transaction, fail) = await _customerProvider.TransactionHistory(nationalId);
 
